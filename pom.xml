@@ -52,7 +52,6 @@
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>9.4.7.v20170914</version>
                 <configuration>
-                    <contextPath>/</contextPath>
                     <scanIntervalSeconds>10</scanIntervalSeconds>
                     <httpConnector>
                         <port>9091</port>
