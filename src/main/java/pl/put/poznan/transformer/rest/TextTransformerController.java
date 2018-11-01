@@ -12,7 +12,7 @@ import java.util.Arrays;
 public class TextTransformerController {
 
     private static final Logger logger = LoggerFactory.getLogger(TextTransformerController.class);
-
+    @CrossOrigin
     @RequestMapping(method = RequestMethod.GET, produces = "application/json")
     public String get(@PathVariable String text,
                               @RequestParam(value="transforms", defaultValue="upper,escape") String[] transforms) {
@@ -25,7 +25,7 @@ public class TextTransformerController {
         TextTransformer transformer = new TextTransformer(transforms);
         return transformer.transform(text);
     }
-
+    @CrossOrigin
     @RequestMapping(method = RequestMethod.POST, produces = "application/json")
     public String post(@PathVariable String text,
                       @RequestBody String[] transforms) {
@@ -38,6 +38,7 @@ public class TextTransformerController {
         TextTransformer transformer = new TextTransformer(transforms);
         return transformer.transform(text);
     }
+
 
 
 
