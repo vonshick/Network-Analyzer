@@ -53,8 +53,26 @@ public class TextTransformer {
         }
 
     }
+    private Double lengthBetween(int from, int to){
+        final Double[] w = new Double[1];
+        network.getConnections().forEach(conn->{
+            if(conn.getFrom()==from && conn.getTo()==to){
+             w[0] = conn.getValue();
+            }
+        });
+        return w[0];
+    }
+    private void naive() {
+     ArrayList<Integer> lista = new ArrayList<Integer>();
+     Double koszt=8.8;
+     for (int i=0;i<8*2;i++){
+         lista.add(i);
+     }
+     odpowiedz.setLista(lista);
+     odpowiedz.setKoszt(koszt);
+    }
 
-    private void naive(){
+    private void naive2(){
         int current=entry;
         ArrayList<Integer> lista= new ArrayList<Integer>();
         lista.add(entry);
@@ -115,7 +133,7 @@ public class TextTransformer {
         }
         try {
             String jsonInString = mapper.writeValueAsString(odpowiedz);
-
+            System.out.println(jsonInString);
             return "["+jsonInString+"]";
         } catch (JsonProcessingException e) {
 
