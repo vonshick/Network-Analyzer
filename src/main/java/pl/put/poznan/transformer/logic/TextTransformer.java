@@ -64,8 +64,7 @@ public class TextTransformer {
             int minIndex=-1;
             for (int i=0;i<graph.get(current).size();i++){
                 if(lista.contains(i)) continue;
-
-                if((minIndex==-1||min>graph.get(current).get(i))&& graph.get(current).get(i)==0.0){
+                if(minIndex==-1||min>graph.get(current).get(i)){
                     minIndex=i;
                     min=graph.get(current).get(i);
                 }
@@ -122,6 +121,6 @@ public class TextTransformer {
 
             return "[{\"lista\":[0,1,3,4,5,2,6,8,7,9],\"koszt\":-1.3}]";
         }
-
+        
     }
 }
