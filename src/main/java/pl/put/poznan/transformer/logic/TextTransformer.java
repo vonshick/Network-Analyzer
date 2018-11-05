@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 /**
  * This is just an example to show that the logic should be outside the REST service.
@@ -12,13 +14,16 @@ import java.util.ArrayList;
 public class TextTransformer {
 
     private final String[] transforms;
-
+    
     private Network network=null;
 
     private Odpowiedz odpowiedz = new Odpowiedz();
 
     private ArrayList<ArrayList<Double>> graph = null;
 
+    private Integer V;
+    private LinkedList<Integer> coolerGraph[];
+    
     private int entry;
     private int exit;
 
@@ -113,11 +118,42 @@ public class TextTransformer {
     }
 
     private void BFS(){
-        naive();
+        int currentVertex;
+        boolean visited[] = new boolean[V];
+        LinkedList<Integer> queue = new LinkedList<Integer>();
+        visited[entry] = true;
+        queue.add(entry);
+        
+        while (!queue.isEmpty()) {
+            currentVertex =  queue.poll();
+            Iterator<Integer> i = coolerGraph[currentVertex].listIterator();
+            while(i.hasNext()) {
+                int n = i.next();
+                if (!visited[n]) {
+                    visited[n] = true;
+                    queue.add(n);
+                }
+            }
+        }
     }
 
+    private void DFSrecursive(int currentVertex, boolean visited[]) {
+        visited[currentVertex] = true;
+        
+        Iterator<Integer> i = coolerGraph[currentVertex].listIterator();
+        while(i.hasNext()) {
+            int n = i.next();
+            if (!visited[n]) {
+                DFSrecursive(n, visited);
+            }
+        }
+    }
+    
     private void DFS(){
-        naive();
+        int currentVertex = entry;
+        boolean visited[] = new boolean[V];
+        
+        DFSrecursive(currentVertex, visited);
     }
 
     public String transform(String text){
