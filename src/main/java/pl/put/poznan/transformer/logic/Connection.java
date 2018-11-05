@@ -7,12 +7,14 @@ public class Connection {
     private int from;
     @JsonProperty("to")
     private int to;
+    @JsonProperty("value")
+    private Double value;
+
 
     public Connection() {
     }
 
-    @JsonProperty("value")
-    private Double value;
+
 
     public Connection(int from, int to, Double value) {
         this.from = from;

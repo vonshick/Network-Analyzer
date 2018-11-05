@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -19,10 +18,25 @@ public class TextTransformer {
     private Odpowiedz odpowiedz = new Odpowiedz();
 
     private ArrayList<ArrayList<Double>> graph = null;
+
     private int entry;
     private int exit;
+
+    private ArrayList<ArrayList<Connection>> incidenceList = null;
+
     public TextTransformer(String[] transforms){
         this.transforms = transforms;
+    }
+
+    private void tramsformToIncidenceList(){
+        incidenceList = new ArrayList<ArrayList<Connection>>();
+        network.getNodes().forEach(e->{
+                    incidenceList.add(new ArrayList<Connection>());
+                }
+                );
+        network.getConnections().forEach(conn-> {
+            incidenceList.get(conn.getFrom()).add(conn);
+        });
     }
 
     private void tramsformToGraph(){
@@ -124,6 +138,12 @@ public class TextTransformer {
         }
 
         tramsformToGraph();
+        tramsformToIncidenceList();
+        for(int i=0;i<incidenceList.size();i++){
+            for (int j=0;j<incidenceList.get(i).size();j++){
+                System.out.println("From "+i+", to "+incidenceList.get(i).get(j).getTo()+", value: "+incidenceList.get(i).get(j).getValue());
+            }
+        }
         if(transforms[0].equals("BFS")) BFS();
         else{
             if(transforms[0].equals("DFS")) DFS();
