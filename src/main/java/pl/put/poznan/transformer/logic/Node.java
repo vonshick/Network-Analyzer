@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 public class Node {
     @JsonProperty("id")
-    private String id;
+    private int id;
     @JsonProperty("name")
     private String name;
     @JsonProperty("type")
@@ -16,7 +16,7 @@ public class Node {
     @JsonProperty("incoming")
     private ArrayList<Integer> incoming;
 
-    public Node(String id, String name, String type, ArrayList outgoing, ArrayList incoming) {
+    public Node(int id, String name, String type, ArrayList outgoing, ArrayList incoming) {
         this.id = id;
         this.name = name;
         this.type = type;
@@ -27,7 +27,7 @@ public class Node {
     public Node() {
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
