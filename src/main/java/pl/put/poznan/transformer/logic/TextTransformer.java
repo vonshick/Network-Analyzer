@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 
 /**
@@ -20,9 +19,6 @@ public class TextTransformer {
     private Odpowiedz odpowiedz = new Odpowiedz();
 
     private ArrayList<ArrayList<Double>> graph = null;
-
-    private Integer V;
-    private LinkedList<Integer> coolerGraph[];
     
     private int entry;
     private int exit;
@@ -81,79 +77,105 @@ public class TextTransformer {
         });
         return w[0];
     }
-    private void naive() {
-     ArrayList<Integer> lista = new ArrayList<Integer>();
-     Double koszt=8.8;
-     for (int i=0;i<8*2;i++){
-         lista.add(i);
-     }
-     odpowiedz.setLista(lista);
-     odpowiedz.setKoszt(koszt);
-    }
-
-    private void naive2(){
-        int current=entry;
-        ArrayList<Integer> lista= new ArrayList<Integer>();
-        lista.add(entry);
-        Double koszt=0.0;
-        while(true){
-            Double min=0.0;
-            int minIndex=-1;
-            for (int i=0;i<graph.get(current).size();i++){
-                if(lista.contains(i)) continue;
-                if(minIndex==-1||min>graph.get(current).get(i)){
-                    minIndex=i;
-                    min=graph.get(current).get(i);
+    
+    /**
+     * function to find the neighbor with minimum cost, that hasn't been
+     * visited yet
+     * @param dist
+     * @param visited
+     * @return 
+     */
+    private int minDistance(double dist[], Boolean visited[]) { 
+        double min = Integer.MAX_VALUE;
+        int min_index = -1; 
+        for (int i = 0; i < incidenceList.size(); i++) {
+            if (visited[i] == false && dist[i] <= min) { 
+                min = dist[i]; 
+                min_index = i; 
+            } 
+        } 
+        return min_index; 
+    } 
+    
+    private void greedy() {
+        double dist[] = new double[incidenceList.size()];
+        Boolean visited[] = new Boolean[incidenceList.size()];
+        
+        for (int i = 0; i < incidenceList.size(); i++) {
+            dist[i] = Integer.MAX_VALUE;
+            visited[i] = false;
+        }
+        
+        dist[entry] = 0;
+        
+        for (int  i = 0; i < incidenceList.size() - 1; i++) {
+            int min = minDistance(dist, visited);
+            visited[min] = true;
+            
+            for (int j = 0; j < incidenceList.get(min).size(); j++) {
+                int neighbor = incidenceList.get(min).get(j).getTo();
+                double valueOfNeighbor = incidenceList.get(min).get(j).getValue();
+                if(!visited[neighbor] && dist[min] != Integer.MAX_VALUE 
+                        && dist[min] +  valueOfNeighbor < dist[neighbor]) {
+                    dist[neighbor] = dist[min] + valueOfNeighbor;
                 }
             }
-            koszt+=min;
-            current=minIndex;
-            lista.add(current);
-            if(current==exit) break;
-
         }
-        odpowiedz.setLista(lista);
-        odpowiedz.setKoszt(koszt);
-
     }
 
     private void BFS(){
-        int currentVertex;
-        boolean visited[] = new boolean[V];
-        LinkedList<Integer> queue = new LinkedList<Integer>();
-        visited[entry] = true;
-        queue.add(entry);
+        ArrayList<Connection> currentVertex = incidenceList.get(entry);
+        boolean visited[] = new boolean[incidenceList.size()];
+        LinkedList<ArrayList<Connection>> queue 
+                = new LinkedList<ArrayList<Connection>>();
+        
+        visited[incidenceList.indexOf(currentVertex)] = true;
+        queue.add(currentVertex);
+        
+        ArrayList<Integer> resultPath = new ArrayList<>();
+        Double resultValue = 0.0;
         
         while (!queue.isEmpty()) {
-            currentVertex =  queue.poll();
-            Iterator<Integer> i = coolerGraph[currentVertex].listIterator();
-            while(i.hasNext()) {
-                int n = i.next();
+            currentVertex = queue.poll();
+            if(!resultPath.contains(incidenceList.indexOf(currentVertex))) {
+                resultPath.add(incidenceList.indexOf(currentVertex));
+            }
+            
+            for(int i = 0; i < currentVertex.size(); i++) {
+                int n = currentVertex.get(i).getTo();
                 if (!visited[n]) {
                     visited[n] = true;
-                    queue.add(n);
+                    queue.add(incidenceList.get(n));
                 }
             }
         }
+        
+        odpowiedz.setLista(resultPath);
+        odpowiedz.setKoszt(resultValue);
     }
 
-    private void DFSrecursive(int currentVertex, boolean visited[]) {
-        visited[currentVertex] = true;
+    private void DFSrecursive(ArrayList<Connection> currentVertex, boolean visited[]) {
+        visited[incidenceList.indexOf(currentVertex)] = true;
         
-        Iterator<Integer> i = coolerGraph[currentVertex].listIterator();
-        while(i.hasNext()) {
-            int n = i.next();
-            if (!visited[n]) {
-                DFSrecursive(n, visited);
+        for(int i = 0; i < currentVertex.size(); i++) {
+                int n = currentVertex.get(i).getTo();
+                if (!visited[n]) {
+                    DFSrecursive(incidenceList.get(n), visited);
+                }
             }
-        }
     }
     
     private void DFS(){
-        int currentVertex = entry;
-        boolean visited[] = new boolean[V];
+        ArrayList<Connection> currentVertex = incidenceList.get(entry);
+        boolean visited[] = new boolean[incidenceList.size()];
+        
+        ArrayList<Integer> resultPath = new ArrayList<>();
+        Double resultValue = 0.0;
         
         DFSrecursive(currentVertex, visited);
+        
+        odpowiedz.setLista(resultPath);
+        odpowiedz.setKoszt(resultValue);
     }
 
     public String transform(String text){
@@ -184,7 +206,7 @@ public class TextTransformer {
         else{
             if(transforms[0].equals("DFS")) DFS();
             else{
-                naive();
+                greedy();
             }
         }
         try {
