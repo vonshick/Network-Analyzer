@@ -115,6 +115,7 @@ public class TextTransformer {
             for (int j = 0; j < incidenceList.get(min).size(); j++) {
                 int neighbor = incidenceList.get(min).get(j).getTo();
                 double valueOfNeighbor = incidenceList.get(min).get(j).getValue();
+                
                 if(!visited[neighbor] && dist[min] != Integer.MAX_VALUE 
                         && dist[min] +  valueOfNeighbor < dist[neighbor]) {
                     dist[neighbor] = dist[min] + valueOfNeighbor;
@@ -122,13 +123,22 @@ public class TextTransformer {
             }
         }
     }
-
+    /**
+     * BFS traversal from a entry to exit.
+     * Creates path from entry to exit as an array and the value of that path.
+     */
     private void BFS(){
+        //Assigning first vertex
         ArrayList<Connection> currentVertex = incidenceList.get(entry);
+        
+        //Creating visited array for algorithm
         boolean visited[] = new boolean[incidenceList.size()];
+        
+        //Creating queue list for visited vertices
         LinkedList<ArrayList<Connection>> queue 
                 = new LinkedList<ArrayList<Connection>>();
         
+        //Marking the first vertex as visited and adding it to queue
         visited[incidenceList.indexOf(currentVertex)] = true;
         queue.add(currentVertex);
         
@@ -140,15 +150,16 @@ public class TextTransformer {
             if(!resultPath.contains(incidenceList.indexOf(currentVertex))) {
                 resultPath.add(incidenceList.indexOf(currentVertex));
             }
-            
             for(int i = 0; i < currentVertex.size(); i++) {
-                int n = currentVertex.get(i).getTo();
-                if (!visited[n]) {
-                    visited[n] = true;
-                    queue.add(incidenceList.get(n));
+                int neighbor = currentVertex.get(i).getTo();
+                if (!visited[neighbor]) {
+                    visited[neighbor] = true;
+                    queue.add(incidenceList.get(neighbor));
                 }
             }
         }
+        
+        
         
         odpowiedz.setLista(resultPath);
         odpowiedz.setKoszt(resultValue);
