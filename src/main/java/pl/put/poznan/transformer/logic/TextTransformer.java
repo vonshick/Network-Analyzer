@@ -24,6 +24,9 @@ public class TextTransformer {
     private int exit;
 
     private ArrayList<ArrayList<Connection>> incidenceList = null;
+    private ArrayList<ArrayList<Integer>> arrayOfPaths = null;
+    private ArrayList<Integer> resultPath = null;
+    private Double resultValue = Double.MAX_VALUE;
 
     public TextTransformer(String[] transforms){
         this.transforms = transforms;
@@ -123,70 +126,133 @@ public class TextTransformer {
             }
         }
     }
+    
     /**
      * BFS traversal from a entry to exit.
-     * Creates path from entry to exit as an array and the value of that path.
+     * Function finds an array of possible paths from entry to exit using BFS
+     * and assigns the path with minmal value to odpowiedz
      */
     private void BFS(){
-        //Assigning first vertex
+        
         ArrayList<Connection> currentVertex = incidenceList.get(entry);
-        
-        //Creating visited array for algorithm
-        boolean visited[] = new boolean[incidenceList.size()];
-        
-        //Creating queue list for visited vertices
+        LinkedList<ArrayList<Connection>> previousVertecies 
+                = new LinkedList<ArrayList<Connection>>();
         LinkedList<ArrayList<Connection>> queue 
                 = new LinkedList<ArrayList<Connection>>();
-        
-        //Marking the first vertex as visited and adding it to queue
-        visited[incidenceList.indexOf(currentVertex)] = true;
         queue.add(currentVertex);
+        resultPath = new ArrayList<>();
         
-        ArrayList<Integer> resultPath = new ArrayList<>();
-        Double resultValue = 0.0;
-        
+        //Starting algorithm
         while (!queue.isEmpty()) {
-            currentVertex = queue.poll();
-            if(!resultPath.contains(incidenceList.indexOf(currentVertex))) {
+            
+            currentVertex = queue.element();
+            resultPath.add(incidenceList.indexOf(currentVertex));
+            
+            if(incidenceList.indexOf(currentVertex) == exit) {
+                arrayOfPaths.add(resultPath);
+                
+                //When we find the exit we no longer need to search through
+                //the graph so we remove the current node from queue
+                queue.remove();
+                resultPath.remove(incidenceList.indexOf(currentVertex));
+                currentVertex = queue.element();
+                
+                //If the current head of queue is our previous node,
+                //we are going to remove it as, because that node has been checked
+                while(incidenceList.indexOf(currentVertex) == 
+                        incidenceList.indexOf(previousVertecies.element())) {
+                    queue.remove();
+                    resultPath.remove(incidenceList.indexOf(currentVertex));
+                    previousVertecies.remove();
+                    currentVertex = queue.element();
+                }
                 resultPath.add(incidenceList.indexOf(currentVertex));
             }
+            
+            //We are adding neighbours to queue
             for(int i = 0; i < currentVertex.size(); i++) {
                 int neighbor = currentVertex.get(i).getTo();
-                if (!visited[neighbor]) {
-                    visited[neighbor] = true;
-                    queue.add(incidenceList.get(neighbor));
+                queue.add(incidenceList.get(neighbor));
+            }
+            //We are going to remember our currentVertex to track down our path
+            previousVertecies.add(currentVertex);
+        }
+        
+        odpowiedz.setLista(resultPath);
+        odpowiedz.setKoszt(resultValue);
+    }
+    
+    /**
+     * DFS traversal from entry to exit
+     * @param currentVertex 
+     */
+    private void DFSrecursive(ArrayList<Connection> currentVertex) {
+        
+        //We are adding current node to result path
+        resultPath.add(incidenceList.indexOf(currentVertex));
+        
+        //and if this our destination we are adding that path to an arrayOfPaths
+        if(incidenceList.indexOf(currentVertex) == exit) {
+            arrayOfPaths.add(resultPath);
+            return;
+        }
+        
+        for(int i = 0; i < currentVertex.size(); i++) {
+            int n = currentVertex.get(i).getTo();
+            DFSrecursive(incidenceList.get(n));
+            
+            //We are deleting checked node from resultPath because
+            //[1] it was probably our exit and we already have saved that path
+            //[2] or it was dead end
+            if(resultPath.contains(n)) resultPath.remove(n);
+        }
+    }
+    
+    /**
+     * DFS traversal from entry to exit.
+     * Function finds an array of possible paths from entry to exit using DFS
+     * and assigns the path with minmal value to odpowiedz
+     */
+    private void DFS(){
+        
+        ArrayList<Connection> currentVertex = incidenceList.get(entry);        
+        resultPath = new ArrayList<>();
+        arrayOfPaths = new ArrayList<>();
+        for (ArrayList<Integer> path : arrayOfPaths) {
+            path = new ArrayList<>();
+        }
+        
+        //Starting algorithm
+        DFSrecursive(currentVertex);
+                
+        //We are going to search for a path that has minimal value
+        for (int pathId = 0; pathId < arrayOfPaths.size(); pathId++) {
+            ArrayList<Integer> path = arrayOfPaths.get(pathId);
+            double tempValue = 0.0;
+            
+            //We are going to add up values of connections in our path
+            for (int nodeId = 0; nodeId < path.size() - 1; nodeId++) {
+                int nextNode = nodeId + 1;
+                for (Connection conn : incidenceList.get(nodeId)) {
+                    if (conn.getTo() == nextNode) {
+                        tempValue += conn.getValue();
+                    }
                 }
+            }
+            
+            //Assigning final result if minimal
+            if (tempValue < resultValue) {
+                resultValue = tempValue;
+                resultPath.clear();
+                resultPath = arrayOfPaths.get(pathId);
             }
         }
         
-        
-        
         odpowiedz.setLista(resultPath);
         odpowiedz.setKoszt(resultValue);
-    }
-
-    private void DFSrecursive(ArrayList<Connection> currentVertex, boolean visited[]) {
-        visited[incidenceList.indexOf(currentVertex)] = true;
-        
-        for(int i = 0; i < currentVertex.size(); i++) {
-                int n = currentVertex.get(i).getTo();
-                if (!visited[n]) {
-                    DFSrecursive(incidenceList.get(n), visited);
-                }
-            }
-    }
-    
-    private void DFS(){
-        ArrayList<Connection> currentVertex = incidenceList.get(entry);
-        boolean visited[] = new boolean[incidenceList.size()];
-        
-        ArrayList<Integer> resultPath = new ArrayList<>();
-        Double resultValue = 0.0;
-        
-        DFSrecursive(currentVertex, visited);
-        
-        odpowiedz.setLista(resultPath);
-        odpowiedz.setKoszt(resultValue);
+        resultValue = Double.MAX_VALUE;
+        resultPath.clear();
+        arrayOfPaths.clear();
     }
 
     public String transform(String text){
