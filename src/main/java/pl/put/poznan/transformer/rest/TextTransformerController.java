@@ -15,7 +15,7 @@ public class TextTransformerController {
     @CrossOrigin
     @RequestMapping(method = RequestMethod.GET, produces = "application/json")
     public String get(@PathVariable String text,
-                              @RequestParam(value="transforms", defaultValue="naive") String[] transforms) {
+                              @RequestParam(value="requestedAlgorithm", defaultValue="naive") String[] transforms) {
 
         // log the parameters
         logger.debug(text);
