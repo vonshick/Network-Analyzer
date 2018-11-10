@@ -24,9 +24,31 @@ public class TextTransformer {
     private int exit;
 
     private ArrayList<ArrayList<Connection>> incidenceList = null;
+    
     private ArrayList<ArrayList<Integer>> arrayOfPaths = null;
     private ArrayList<Integer> resultPath = null;
     private Double resultValue = Double.MAX_VALUE;
+      
+    public void setGraph () {
+        incidenceList = new ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+            incidenceList.set(i, new ArrayList<>());
+        }
+        incidenceList.get(1).add(new Connection(1,2,2.0));
+        incidenceList.get(1).add(new Connection(1,3,1.0));
+        
+        incidenceList.get(2).add(new Connection(2,3,5.0));
+        incidenceList.get(2).add(new Connection(2,4,1.0));
+        incidenceList.get(2).add(new Connection(2,5,2.0));
+        
+        incidenceList.get(3).add(new Connection(3,5,3.0));
+        
+        incidenceList.get(4).add(new Connection(4,6,5.0));
+        
+        incidenceList.get(5).add(new Connection(5,4,5.0));
+        
+        incidenceList.get(6).add(new Connection(6,5,4.0));
+    }
 
     public TextTransformer(String[] transforms){
         this.transforms = transforms;
@@ -82,49 +104,105 @@ public class TextTransformer {
     }
     
     /**
-     * function to find the neighbor with minimum cost, that hasn't been
+     * This function finds path with minimal value and asigns it to odpowiedz
+     */
+    private void finalResults() {
+        //We are going to search for a path that has minimal value
+        for (int pathId = 0; pathId < arrayOfPaths.size(); pathId++) {
+            ArrayList<Integer> path = arrayOfPaths.get(pathId);
+            double tempValue = 0.0;
+            
+            //We are going to add up values of connections in our path
+            for (int nodeId = 0; nodeId < path.size() - 1; nodeId++) {
+                int nextNode = nodeId + 1;
+                for (Connection conn : incidenceList.get(nodeId)) {
+                    if (conn.getTo() == nextNode) {
+                        tempValue += conn.getValue();
+                    }
+                }
+            }
+            
+            //Assigning final result if minimal
+            if (tempValue < resultValue) {
+                resultValue = tempValue;
+                resultPath.clear();
+                resultPath = arrayOfPaths.get(pathId);
+            }
+        }
+        
+        odpowiedz.setLista(resultPath);
+        odpowiedz.setKoszt(resultValue);
+        resultValue = Double.MAX_VALUE;
+        resultPath.clear();
+        arrayOfPaths.clear();
+    }
+    
+    /**
+     * function that finds the neighbor with minimum cost, that hasn't been
      * visited yet
      * @param dist
      * @param visited
      * @return 
      */
-    private int minDistance(double dist[], Boolean visited[]) { 
+    private int minDistance(double dist[], ArrayList<Boolean[]> visited) 
+    { 
         double min = Integer.MAX_VALUE;
-        int min_index = -1; 
+        int minIndex = -1;
         for (int i = 0; i < incidenceList.size(); i++) {
-            if (visited[i] == false && dist[i] <= min) { 
-                min = dist[i]; 
-                min_index = i; 
-            } 
-        } 
-        return min_index; 
+            for (int j = 0; j < incidenceList.get(i).size(); j++) {
+                if (!visited.get(i)[j] && dist[i] <= min) { 
+                    min = dist[i];           
+                    minIndex = i;
+                } 
+            }
+        }
+        return minIndex; 
     } 
     
     private void greedy() {
         double dist[] = new double[incidenceList.size()];
-        Boolean visited[] = new Boolean[incidenceList.size()];
+        ArrayList<Boolean[]> visited = new ArrayList<>();
+        
+        for (int i = 0; i < incidenceList.size(); i++) {
+            visited.set(i, new Boolean[incidenceList.get(i).size()]);
+        }
         
         for (int i = 0; i < incidenceList.size(); i++) {
             dist[i] = Integer.MAX_VALUE;
-            visited[i] = false;
+            for (int j = 0; j < incidenceList.get(i).size(); j++) {
+                visited.get(i)[j] = false;
+            }
         }
-        
+        int neighbor = -1;
         dist[entry] = 0;
-        
+               
         for (int  i = 0; i < incidenceList.size() - 1; i++) {
+            
             int min = minDistance(dist, visited);
-            visited[min] = true;
+            if(min == neighbor) {
+                visited.get(min)[neighbor] = true;
+                resultPath.add(min);
+                if (min == exit) {
+                    resultValue = dist[min];
+                    break;
+                }
+            }
             
             for (int j = 0; j < incidenceList.get(min).size(); j++) {
-                int neighbor = incidenceList.get(min).get(j).getTo();
+                
+                neighbor = incidenceList.get(min).get(j).getTo();
                 double valueOfNeighbor = incidenceList.get(min).get(j).getValue();
                 
-                if(!visited[neighbor] && dist[min] != Integer.MAX_VALUE 
+                if(!visited.get(min)[neighbor] && dist[min] != Integer.MAX_VALUE 
                         && dist[min] +  valueOfNeighbor < dist[neighbor]) {
+                    
                     dist[neighbor] = dist[min] + valueOfNeighbor;
                 }
             }
         }
+        
+        odpowiedz.setKoszt(resultValue);
+        odpowiedz.setLista(resultPath);
     }
     
     /**
@@ -178,8 +256,7 @@ public class TextTransformer {
             previousVertecies.add(currentVertex);
         }
         
-        odpowiedz.setLista(resultPath);
-        odpowiedz.setKoszt(resultValue);
+        finalResults();
     }
     
     /**
@@ -204,7 +281,7 @@ public class TextTransformer {
             //We are deleting checked node from resultPath because
             //[1] it was probably our exit and we already have saved that path
             //[2] or it was dead end
-            if(resultPath.contains(n)) resultPath.remove(n);
+            resultPath.remove(n);
         }
     }
     
@@ -224,35 +301,7 @@ public class TextTransformer {
         
         //Starting algorithm
         DFSrecursive(currentVertex);
-                
-        //We are going to search for a path that has minimal value
-        for (int pathId = 0; pathId < arrayOfPaths.size(); pathId++) {
-            ArrayList<Integer> path = arrayOfPaths.get(pathId);
-            double tempValue = 0.0;
-            
-            //We are going to add up values of connections in our path
-            for (int nodeId = 0; nodeId < path.size() - 1; nodeId++) {
-                int nextNode = nodeId + 1;
-                for (Connection conn : incidenceList.get(nodeId)) {
-                    if (conn.getTo() == nextNode) {
-                        tempValue += conn.getValue();
-                    }
-                }
-            }
-            
-            //Assigning final result if minimal
-            if (tempValue < resultValue) {
-                resultValue = tempValue;
-                resultPath.clear();
-                resultPath = arrayOfPaths.get(pathId);
-            }
-        }
-        
-        odpowiedz.setLista(resultPath);
-        odpowiedz.setKoszt(resultValue);
-        resultValue = Double.MAX_VALUE;
-        resultPath.clear();
-        arrayOfPaths.clear();
+        finalResults();        
     }
 
     public String transform(String text){

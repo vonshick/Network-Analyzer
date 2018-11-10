@@ -14,8 +14,6 @@ public class Connection {
     public Connection() {
     }
 
-
-
     public Connection(int from, int to, Double value) {
         this.from = from;
         this.to = to;
