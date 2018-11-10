@@ -157,8 +157,48 @@ public class TextTransformer {
             }
         }
         return minIndex; 
-    } 
-    
+    }
+
+    private void naive(){
+        double koszt = 0.0;
+        ArrayList<Integer> lista = new ArrayList<Integer>();
+        int current = entry;
+
+        lista.add(entry);
+
+        while(current!=exit){
+            double potencjalnyKoszt = 0.0;
+            double min=-1.0;
+            int minIndex = -1;
+            boolean leadsToUnvisited = false;
+
+            for (Connection conn:incidenceList.get(current)){
+                if(!lista.contains(conn.getTo())){
+                    leadsToUnvisited = true;
+                    break;
+                }
+            }
+
+            for (Connection conn:incidenceList.get(current)) {
+                if ((minIndex == -1 || min > conn.getValue()) && (!leadsToUnvisited || !lista.contains(conn.getTo()))) {
+                    min = conn.getValue();
+                    minIndex = conn.getTo();
+                    potencjalnyKoszt = conn.getValue();
+                }
+            }
+            current = minIndex;
+
+            lista.add(minIndex);
+            koszt+=potencjalnyKoszt;
+            System.out.println(current);
+
+        }
+
+        odpowiedz.setKoszt(koszt);
+        odpowiedz.setLista(lista);
+
+    }
+
     private void greedy() {
         double dist[] = new double[incidenceList.size()];
         ArrayList<Boolean[]> visited = new ArrayList<>();
@@ -328,11 +368,11 @@ public class TextTransformer {
                 System.out.println("From "+i+", to "+incidenceList.get(i).get(j).getTo()+", value: "+incidenceList.get(i).get(j).getValue());
             }
         }
-        if(transforms[0].equals("BFS")) BFS();
+        if(transforms[0].equals("BFS")) naive();
         else{
-            if(transforms[0].equals("DFS")) DFS();
+            if(transforms[0].equals("DFS")) naive();
             else{
-                greedy();
+                naive();
             }
         }
         try {
