@@ -175,7 +175,6 @@ public class GraphTraverser {
 
             lista.add(minIndex);
             koszt+=potencjalnyKoszt;
-            System.out.println(current);
 
         }
 
@@ -411,21 +410,25 @@ public class GraphTraverser {
         if(requestedAlgorithm[0].equals("BFS")) {
             logger.info("Starting BFS algorithm");
             naive();
+            logger.info("BFS algorithm ended");
         }
         else{
             if(requestedAlgorithm[0].equals("DFS")) {
                 logger.info("Starting DFS algorithm");
                 naive();
+                logger.info("DFS algorithm ended");
             }
             else{
                 logger.info("Starting naive algorithm");
                 naive();
+                logger.info("Naive algorithm ended");
             }
         }
 
         try {
             String jsonInString = mapper.writeValueAsString(answer);
-            System.out.println(jsonInString);
+            logger.info("Sending output to client:");
+            logger.info(jsonInString);
             return "["+jsonInString+"]";
         } catch (JsonProcessingException e) {
             logger.debug("Failed to map answer to Network class");
