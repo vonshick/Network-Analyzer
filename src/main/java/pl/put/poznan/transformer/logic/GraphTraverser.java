@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Collections;
 
 /**
  * Graphtraverser is a class storing and traversing the graph sent to the server by the client
@@ -29,35 +29,6 @@ public class GraphTraverser {
     private int exit;
 
     private ArrayList<ArrayList<Connection>> incidenceList = null;
-    
-    private ArrayList<ArrayList<Integer>> arrayOfPaths = null;
-    private ArrayList<Integer> resultPath = null;
-    private Double resultValue = Double.MAX_VALUE;
-
-
-    /**
-    *Debug class, should be deleted in the final version
-     */
-    public void setGraph () {
-        incidenceList = new ArrayList<>();
-        for (int i = 0; i < 6; i++) {
-            incidenceList.set(i, new ArrayList<>());
-        }
-        incidenceList.get(1).add(new Connection(1,2,2.0));
-        incidenceList.get(1).add(new Connection(1,3,1.0));
-        
-        incidenceList.get(2).add(new Connection(2,3,5.0));
-        incidenceList.get(2).add(new Connection(2,4,1.0));
-        incidenceList.get(2).add(new Connection(2,5,2.0));
-        
-        incidenceList.get(3).add(new Connection(3,5,3.0));
-        
-        incidenceList.get(4).add(new Connection(4,6,5.0));
-        
-        incidenceList.get(5).add(new Connection(5,4,5.0));
-        
-        incidenceList.get(6).add(new Connection(6,5,4.0));
-    }
 
     /**
      * Class constructor
@@ -85,62 +56,6 @@ public class GraphTraverser {
         });
     }
     
-    /**
-     * This function finds path with minimal value and asigns it to answer
-     */
-    private void finalResults() {
-        //We are going to search for a path that has minimal value
-        for (int pathId = 0; pathId < arrayOfPaths.size(); pathId++) {
-            ArrayList<Integer> path = arrayOfPaths.get(pathId);
-            double tempValue = 0.0;
-            
-            //We are going to add up values of connections in our path
-            for (int nodeId = 0; nodeId < path.size() - 1; nodeId++) {
-                int nextNode = nodeId + 1;
-                for (Connection conn : incidenceList.get(nodeId)) {
-                    if (conn.getTo() == nextNode) {
-                        tempValue += conn.getValue();
-                    }
-                }
-            }
-            
-            //Assigning final result if minimal
-            if (tempValue < resultValue) {
-                resultValue = tempValue;
-                resultPath.clear();
-                resultPath = arrayOfPaths.get(pathId);
-            }
-        }
-        
-        answer.setVisitedList(resultPath);
-        answer.setCost(resultValue);
-        resultValue = Double.MAX_VALUE;
-        resultPath.clear();
-        arrayOfPaths.clear();
-    }
-    
-    /**
-     * function that finds the neighbor with minimum cost, that hasn't been
-     * visited yet
-     * @param dist
-     * @param visited
-     * @return 
-     */
-    private int minDistance(double dist[], ArrayList<Boolean[]> visited) 
-    { 
-        double min = Integer.MAX_VALUE;
-        int minIndex = -1;
-        for (int i = 0; i < incidenceList.size(); i++) {
-            for (int j = 0; j < incidenceList.get(i).size(); j++) {
-                if (!visited.get(i)[j] && dist[i] <= min) { 
-                    min = dist[i];           
-                    minIndex = i;
-                } 
-            }
-        }
-        return minIndex; 
-    }
-
     /**
      * Algorithm traversing the network naively and setting answer to the path given by this algorithm
      */
@@ -181,148 +96,158 @@ public class GraphTraverser {
         answer = new Answer(lista,koszt);
     }
 
-    private void greedy() {
-        double dist[] = new double[incidenceList.size()];
-        ArrayList<Boolean[]> visited = new ArrayList<>();
-        
-        for (int i = 0; i < incidenceList.size(); i++) {
-            visited.set(i, new Boolean[incidenceList.get(i).size()]);
-        }
-        
-        for (int i = 0; i < incidenceList.size(); i++) {
-            dist[i] = Integer.MAX_VALUE;
-            for (int j = 0; j < incidenceList.get(i).size(); j++) {
-                visited.get(i)[j] = false;
-            }
-        }
-        int neighbor = -1;
-        dist[entry] = 0;
-               
-        for (int  i = 0; i < incidenceList.size() - 1; i++) {
-            
-            int min = minDistance(dist, visited);
-            if(min == neighbor) {
-                visited.get(min)[neighbor] = true;
-                resultPath.add(min);
-                if (min == exit) {
-                    resultValue = dist[min];
-                    break;
-                }
-            }
-            
-            for (int j = 0; j < incidenceList.get(min).size(); j++) {
-                
-                neighbor = incidenceList.get(min).get(j).getTo();
-                double valueOfNeighbor = incidenceList.get(min).get(j).getValue();
-                
-                if(!visited.get(min)[neighbor] && dist[min] != Integer.MAX_VALUE 
-                        && dist[min] +  valueOfNeighbor < dist[neighbor]) {
-                    
-                    dist[neighbor] = dist[min] + valueOfNeighbor;
-                }
-            }
-        }
-        
-        answer.setCost(resultValue);
-        answer.setVisitedList(resultPath);
+    /**
+     *
+     * @param d list of ints to find argmin in
+     * @param q list that contains potential argmins
+     * @return argmin of d ommiting every potentioal argmin that is not contained in q
+     */
+    private int argmin(ArrayList<Double> d, ArrayList<Integer> q){
+         Double min = Double.MAX_VALUE;
+         int argmin = -1;
+         for(int i=0;i<d.size();i++){
+             if(q.contains(i) && d.get(i)<min){
+
+                 min=d.get(i);
+                 logger.debug("min="+min);
+                 logger.debug("argmin="+i);
+                 argmin=i;
+             }
+         }
+         return argmin;
     }
-    
+
     /**
      * BFS traversal from a entry to exit.
      * Function finds an array of possible paths from entry to exit using BFS
-     * and assigns the path with minmal value to answer
+     * and assigns the path with minimal value to answer
      */
-    private void BFS(){
-        
-        ArrayList<Connection> currentVertex = incidenceList.get(entry);
-        LinkedList<ArrayList<Connection>> previousVertecies 
-                = new LinkedList<ArrayList<Connection>>();
-        LinkedList<ArrayList<Connection>> queue 
-                = new LinkedList<ArrayList<Connection>>();
-        queue.add(currentVertex);
-        resultPath = new ArrayList<>();
-        
-        //Starting algorithm
-        while (!queue.isEmpty()) {
-            
-            currentVertex = queue.element();
-            resultPath.add(incidenceList.indexOf(currentVertex));
-            
-            if(incidenceList.indexOf(currentVertex) == exit) {
-                arrayOfPaths.add(resultPath);
-                
-                //When we find the exit we no longer need to search through
-                //the graph so we remove the current node from queue
-                queue.remove();
-                resultPath.remove(incidenceList.indexOf(currentVertex));
-                currentVertex = queue.element();
-                
-                //If the current head of queue is our previous node,
-                //we are going to remove it as, because that node has been checked
-                while(incidenceList.indexOf(currentVertex) == 
-                        incidenceList.indexOf(previousVertecies.element())) {
-                    queue.remove();
-                    resultPath.remove(incidenceList.indexOf(currentVertex));
-                    previousVertecies.remove();
-                    currentVertex = queue.element();
+    private void dijkstra(){
+        //dystanse
+        ArrayList<Double> d = new ArrayList<>();
+        //poprzedniki
+        ArrayList<Integer> p = new ArrayList<>();
+        //kopia listy wierzchołków
+        ArrayList<Integer> q = new ArrayList<>();
+        //lista do odpwoiedzi generowana z p
+        ArrayList<Integer> l = new ArrayList<>();
+
+
+        int u;
+        for(int i=0;i<incidenceList.size();i++){
+            d.add(Double.MAX_VALUE);
+            p.add(null);
+            q.add(i);
+        }
+        d.set(entry,0.0);
+        while(q.size()>0){
+            int n = argmin(d,q);
+            u=n;
+            q.removeIf(s -> s == n);
+            logger.debug("u="+u);
+            for(Connection v:incidenceList.get(u)){
+                if(d.get(v.getTo())>d.get(u)+v.getValue()){
+                    d.set(v.getTo(),d.get(u)+v.getValue());
+                    logger.debug(""+v.getTo()+" "+d.get(v.getTo()));
+                    p.set(v.getTo(),u);
                 }
-                resultPath.add(incidenceList.indexOf(currentVertex));
             }
-            
-            //We are adding neighbours to queue
-            for(int i = 0; i < currentVertex.size(); i++) {
-                int neighbor = currentVertex.get(i).getTo();
-                queue.add(incidenceList.get(neighbor));
-            }
-            //We are going to remember our currentVertex to track down our path
-            previousVertecies.add(currentVertex);
         }
-        
-        finalResults();
+        u=exit;
+        l.add(exit);
+        while(u!=entry){
+            u=p.get(u);
+            l.add(0,u);
+        }
+        answer = new Answer(l,d.get(exit));
     }
-    
-    /**
-     * DFS traversal from entry to exit
-     * @param currentVertex 
-     */
-    private void DFSrecursive(ArrayList<Connection> currentVertex) {
-        
-        //We are adding current node to result path
-        resultPath.add(incidenceList.indexOf(currentVertex));
-        
-        //and if this our destination we are adding that path to an arrayOfPaths
-        if(incidenceList.indexOf(currentVertex) == exit) {
-            arrayOfPaths.add(resultPath);
-            return;
+
+    private void wypiszlisteintow(ArrayList<Integer> l){
+        String a="";
+        for(Integer i:l){
+            a+=""+i+" ";
         }
-        
-        for(int i = 0; i < currentVertex.size(); i++) {
-            int n = currentVertex.get(i).getTo();
-            DFSrecursive(incidenceList.get(n));
-            
-            //We are deleting checked node from resultPath because
-            //[1] it was probably our exit and we already have saved that path
-            //[2] or it was dead end
-            resultPath.remove(n);
-        }
+        logger.debug(a);
     }
-    
+
+    private boolean DFSrecursion(ArrayList<Integer> listaIndeksow,ArrayList<Integer> visited ){
+
+        listaIndeksow.set(0,listaIndeksow.get(0)+1);
+
+        if(listaIndeksow.size()==1){
+            if(listaIndeksow.get(listaIndeksow.size()-1)<incidenceList.get(entry).size()) return false;
+        }
+
+        if(listaIndeksow.get(0)>=incidenceList.get(visited.get(0)).size()){
+           listaIndeksow.remove(0);
+           visited.remove(0);
+           if(listaIndeksow.size()<1)   return false;
+           return DFSrecursion(listaIndeksow,visited);
+        }
+
+        return true;
+    }
+
     /**
      * DFS traversal from entry to exit.
      * Function finds an array of possible paths from entry to exit using DFS
      * and assigns the path with minmal value to answer
      */
     private void DFS(){
-        ArrayList<Connection> currentVertex = incidenceList.get(entry);        
-        resultPath = new ArrayList<>();
-        arrayOfPaths = new ArrayList<>();
-        for (ArrayList<Integer> path : arrayOfPaths) {
-            path = new ArrayList<>();
+        ArrayList<Answer> listaOdpowiedzi = new ArrayList<>();
+        ArrayList<Integer> visited = new ArrayList<>();
+        ArrayList<Integer> listaIndeksow = new ArrayList<>();
+        Double koszt = 0.0;
+
+        visited.add(entry);
+        listaIndeksow.add(0);
+
+        boolean checkedAll = true;
+        while(checkedAll){
+
+            while(visited.get(0) != exit){
+
+                int potencjalnyNowy = incidenceList.get(visited.get(0)).get(listaIndeksow.get(0)).getTo();
+                if(!visited.contains(potencjalnyNowy)){
+                    visited.add(0,potencjalnyNowy);
+                    listaIndeksow.add(0,0);
+                }
+                else{
+                    checkedAll = DFSrecursion(listaIndeksow,visited);
+                }
+            }
+            if (checkedAll){
+                Collections.reverse(visited);
+                koszt=0.0;
+                for(int i=0;i<visited.size()-2;i++){
+                    for(Connection conn:incidenceList.get(visited.get(i))){
+                        if(conn.getTo()==visited.get(i+1)){
+                            koszt+=conn.getValue();
+                            break;
+                        }
+                    }
+                }
+                listaOdpowiedzi.add(new Answer(new ArrayList<>(visited),koszt));
+                Collections.reverse(visited);
+
+                logger.debug("vis:");
+                wypiszlisteintow(visited);
+
+
+                visited.remove(0);
+                listaIndeksow.remove(0);
+                checkedAll = DFSrecursion(listaIndeksow,visited);
+            }
         }
-        
-        //Starting algorithm
-        DFSrecursive(currentVertex);
-        finalResults();        
+
+        answer = listaOdpowiedzi.get(0);
+        logger.debug("Liczba znalezionych ścieżek: "+listaOdpowiedzi.size());
+        for(Answer ans:listaOdpowiedzi){
+            wypiszlisteintow(ans.getVisitedList());
+        }
+        for(Answer ans:listaOdpowiedzi){
+            if(ans.getValue()<answer.getValue()) answer = ans;
+        }
     }
 
     /**
@@ -409,13 +334,13 @@ public class GraphTraverser {
 
         if(requestedAlgorithm[0].equals("BFS")) {
             logger.info("Starting BFS algorithm");
-            naive();
+            dijkstra();
             logger.info("BFS algorithm ended");
         }
         else{
             if(requestedAlgorithm[0].equals("DFS")) {
                 logger.info("Starting DFS algorithm");
-                naive();
+                DFS();
                 logger.info("DFS algorithm ended");
             }
             else{
