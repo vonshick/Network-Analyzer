@@ -2,24 +2,29 @@ package pl.put.poznan.transformer.logic;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
 /**
- * This is just an example to show that the logic should be outside the REST service.
+ * Graphtraverser is a class storing and traversing the graph sent to the server by the client
+ * @author      Artur Mostowski
+ * @author      Dominik Szmyt
+ * @author      Łukasz Grygier
+ * @author      Jakub Wąsik
+ * @since       1.0
  */
-public class TextTransformer {
+public class GraphTraverser {
 
-    private final String[] transforms;
+    private static Logger logger;
+    private final String[] requestedAlgorithm;
     
     private Network network=null;
 
-    private Odpowiedz odpowiedz = new Odpowiedz();
+    private Answer answer = new Answer();
 
-    private ArrayList<ArrayList<Double>> graph = null;
-    
     private int entry;
     private int exit;
 
@@ -28,7 +33,11 @@ public class TextTransformer {
     private ArrayList<ArrayList<Integer>> arrayOfPaths = null;
     private ArrayList<Integer> resultPath = null;
     private Double resultValue = Double.MAX_VALUE;
-      
+
+
+    /**
+    *Debug class, should be deleted in the final version
+     */
     public void setGraph () {
         incidenceList = new ArrayList<>();
         for (int i = 0; i < 6; i++) {
@@ -50,11 +59,22 @@ public class TextTransformer {
         incidenceList.get(6).add(new Connection(6,5,4.0));
     }
 
-    public TextTransformer(String[] transforms){
-        this.transforms = transforms;
+    /**
+     * Class constructor
+     *
+     * @param requestedAlgorithm    The algorithm chosen by the client ("naive", "BFS", or "DFS")
+     * @param logger                Logger used to output Debug or Info messages
+     */
+    public GraphTraverser(String[] requestedAlgorithm, Logger logger){
+        this.logger=logger;
+        this.requestedAlgorithm = requestedAlgorithm;
     }
 
-    private void tramsformToIncidenceList(){
+    /**
+     * Method parsing the network into Incidence List that is a list of lists of Connectons
+     * @see Connection
+     */
+     private void tramsformToIncidenceList(){
         incidenceList = new ArrayList<ArrayList<Connection>>();
         network.getNodes().forEach(e->{
                     incidenceList.add(new ArrayList<Connection>());
@@ -64,47 +84,9 @@ public class TextTransformer {
             incidenceList.get(conn.getFrom()).add(conn);
         });
     }
-
-    private void tramsformToGraph(){
-        if(network==null) return;
-        graph=new ArrayList<ArrayList<Double>>();
-        for (int i=0;i<network.getNodes().size();i++){
-            graph.add(new ArrayList<>());
-            for(int j=0;j<network.getNodes().size();j++){
-                graph.get(i).add(0.0);
-            }
-        }
-
-        network.getNodes().forEach(node -> {
-            if(node.getType().equals("entry")) entry=node.getId();
-            else{
-                if(node.getType().equals("exit")) exit=node.getId();
-            }
-        });
-
-        network.getConnections().forEach(conn-> graph.get(conn.getFrom()).set(conn.getTo(),conn.getValue()));
-
-        for (int i=0;i<graph.size();i++){
-            for(int j=0;j<graph.get(i).size();j++){
-                System.out.print(graph.get(i).get(j));
-                System.out.print(" ");
-            }
-            System.out.println();
-        }
-
-    }
-    private Double lengthBetween(int from, int to){
-        final Double[] w = new Double[1];
-        network.getConnections().forEach(conn->{
-            if(conn.getFrom()==from && conn.getTo()==to){
-             w[0] = conn.getValue();
-            }
-        });
-        return w[0];
-    }
     
     /**
-     * This function finds path with minimal value and asigns it to odpowiedz
+     * This function finds path with minimal value and asigns it to answer
      */
     private void finalResults() {
         //We are going to search for a path that has minimal value
@@ -130,8 +112,8 @@ public class TextTransformer {
             }
         }
         
-        odpowiedz.setLista(resultPath);
-        odpowiedz.setKoszt(resultValue);
+        answer.setVisitedList(resultPath);
+        answer.setCost(resultValue);
         resultValue = Double.MAX_VALUE;
         resultPath.clear();
         arrayOfPaths.clear();
@@ -159,7 +141,10 @@ public class TextTransformer {
         return minIndex; 
     }
 
-    private void naive(){
+    /**
+     * Algorithm traversing the network naively and setting answer to the path given by this algorithm
+     */
+     private void naive(){
         double koszt = 0.0;
         ArrayList<Integer> lista = new ArrayList<Integer>();
         int current = entry;
@@ -194,9 +179,7 @@ public class TextTransformer {
 
         }
 
-        odpowiedz.setKoszt(koszt);
-        odpowiedz.setLista(lista);
-
+        answer = new Answer(lista,koszt);
     }
 
     private void greedy() {
@@ -241,14 +224,14 @@ public class TextTransformer {
             }
         }
         
-        odpowiedz.setKoszt(resultValue);
-        odpowiedz.setLista(resultPath);
+        answer.setCost(resultValue);
+        answer.setVisitedList(resultPath);
     }
     
     /**
      * BFS traversal from a entry to exit.
      * Function finds an array of possible paths from entry to exit using BFS
-     * and assigns the path with minmal value to odpowiedz
+     * and assigns the path with minmal value to answer
      */
     private void BFS(){
         
@@ -328,10 +311,9 @@ public class TextTransformer {
     /**
      * DFS traversal from entry to exit.
      * Function finds an array of possible paths from entry to exit using DFS
-     * and assigns the path with minmal value to odpowiedz
+     * and assigns the path with minmal value to answer
      */
     private void DFS(){
-        
         ArrayList<Connection> currentVertex = incidenceList.get(entry);        
         resultPath = new ArrayList<>();
         arrayOfPaths = new ArrayList<>();
@@ -344,43 +326,109 @@ public class TextTransformer {
         finalResults();        
     }
 
+    /**
+     * Function checking whether network contains one and only one node of type "entry" and "exit"
+     * and seting entry and exit to their values
+     * @return <code>true</code> if graph is correct <code>flase</code> if not
+     */
+    private boolean checkEntryAndExit(){
+        if (network == null){
+            logger.debug("Failed to map input to Network class");
+            return false;
+        }
+
+        //checkijng if only one entry and only one exit
+        boolean entryFound = false, exitFound = false;
+
+        for(Node node: network.getNodes()){
+            if(node.getType().equals("entry")){
+                if(!entryFound) {
+                    entryFound = true;
+                    entry = node.getId();
+                }
+                else{
+                    logger.debug("Multiple entries in graph");
+                    return false;
+                }
+            }
+            else if(node.getType().equals("exit")) {
+                if (!exitFound) {
+                    exitFound = true;
+                    exit = node.getId();
+                } else {
+                    logger.debug("Multiple exits in graph");
+                    return false;
+                }
+            }
+        }
+        if(!entryFound){
+            logger.debug("No entry in graph");
+            return false;
+        }
+        if(!exitFound){
+            logger.debug("No exit in graph");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Main function of the class,
+     * it parses JSON input sent by the client,
+     * checks whether it's correct,
+     * calls traversing function
+     * and returns the effects of the called function
+     *  
+     * @return JSON containing an object of class Answer with visitedList set to the list of nodes given by the desired algorithm
+     * and cost set to the cost of traversing the graph via these nodes in this order
+     */
     public String transform(String text){
         ObjectMapper mapper = new ObjectMapper();
-        //TODO check if there is 1 entry and 1 exit, check if type is from {entry,exit,regular}
         try {
             network= mapper.readValue(text, Network.class);
         } catch (IOException e) {
+            logger.debug("Failed to map input to Network class");
             e.printStackTrace();
         }
-        if (network != null) {
-            //TODO error here
-            System.out.println(network.getNodes().get(0).getName());
-        }
-        else{
-            System.out.println("netowrk is null");
+
+        if(!checkEntryAndExit()){
             return "BLAD";
         }
 
-        tramsformToGraph();
+        logger.info("Entry: "+entry);
+        logger.info("Exit: "+exit);
+
+        logger.info("Transforming graph to incidence list");
         tramsformToIncidenceList();
+
+        //to może być niepotrzebne
         for(int i=0;i<incidenceList.size();i++){
             for (int j=0;j<incidenceList.get(i).size();j++){
-                System.out.println("From "+i+", to "+incidenceList.get(i).get(j).getTo()+", value: "+incidenceList.get(i).get(j).getValue());
+                logger.debug("From "+i+", to "+incidenceList.get(i).get(j).getTo()+", value: "+incidenceList.get(i).get(j).getValue());
             }
         }
-        if(transforms[0].equals("BFS")) naive();
+
+        if(requestedAlgorithm[0].equals("BFS")) {
+            logger.info("Starting BFS algorithm");
+            naive();
+        }
         else{
-            if(transforms[0].equals("DFS")) naive();
+            if(requestedAlgorithm[0].equals("DFS")) {
+                logger.info("Starting DFS algorithm");
+                naive();
+            }
             else{
+                logger.info("Starting naive algorithm");
                 naive();
             }
         }
+
         try {
-            String jsonInString = mapper.writeValueAsString(odpowiedz);
+            String jsonInString = mapper.writeValueAsString(answer);
             System.out.println(jsonInString);
             return "["+jsonInString+"]";
         } catch (JsonProcessingException e) {
-
+            logger.debug("Failed to map answer to Network class");
             return "[{\"lista\":[0,1,3,4,5,2,6,8,7,9],\"koszt\":-1.3}]";
         }
         
