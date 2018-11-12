@@ -34,7 +34,7 @@ public class Node {
      * @param incoming      list of all the connections ending in the node
      * @since               1.0
      */
-    public Node(int id, String name, String type, ArrayList outgoing, ArrayList incoming) {
+    public Node(int id, String name, String type, ArrayList<Integer> outgoing, ArrayList<Integer> incoming) {
         this.id = id;
         this.name = name;
         this.type = type;
