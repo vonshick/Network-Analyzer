@@ -21,9 +21,9 @@ public class Node {
     @JsonProperty("type")
     private String type;
     @JsonProperty("outgoing")
-    private ArrayList<Integer> outgoing;
+    private ArrayList<Connection> outgoing;
     @JsonProperty("incoming")
-    private ArrayList<Integer> incoming;
+    private ArrayList<Connection> incoming;
 
     /**
      * Class constructor
@@ -34,7 +34,7 @@ public class Node {
      * @param incoming      list of all the connections ending in the node
      * @since               1.0
      */
-    public Node(int id, String name, String type, ArrayList<Integer> outgoing, ArrayList<Integer> incoming) {
+    public Node(int id, String name, String type, ArrayList outgoing, ArrayList incoming) {
         this.id = id;
         this.name = name;
         this.type = type;
@@ -57,11 +57,11 @@ public class Node {
         return type;
     }
 
-    public ArrayList<Integer> getOutgoing() {
+    public ArrayList<Connection> getOutgoing() {
         return outgoing;
     }
 
-    public ArrayList<Integer> getIncoming() {
+    public ArrayList<Connection> getIncoming() {
         return incoming;
     }
 }
