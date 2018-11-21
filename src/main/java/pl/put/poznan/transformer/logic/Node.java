@@ -4,6 +4,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
 
+/**
+ * Node is a class representing an individual node of the network. Each node has an ID, a name (optional),
+ *  a type ("entry", "exit", or "regulat"), a list of outcoming connections, and a list of outgoing connections.
+ * @author      Artur Mostowski
+ * @author      Dominik Szmyt
+ * @author      Łukasz Grygier
+ * @author      Jakub Wąsik
+ * @since       1.0
+ */
 public class Node {
     @JsonProperty("id")
     private int id;
@@ -12,11 +21,20 @@ public class Node {
     @JsonProperty("type")
     private String type;
     @JsonProperty("outgoing")
-    private ArrayList<Integer> outgoing;
+    private ArrayList<Connection> outgoing;
     @JsonProperty("incoming")
-    private ArrayList<Integer> incoming;
+    private ArrayList<Connection> incoming;
 
-    public Node(int id, String name, String type, ArrayList outgoing, ArrayList incoming) {
+    /**
+     * Class constructor
+     * @param id            numeric ID of the node
+     * @param name          optional human-friendly name of the node
+     * @param type          type of the node, it must be either "entry", "exit" or "regular"
+     * @param outgoing      list of all the connections originating in the node
+     * @param incoming      list of all the connections ending in the node
+     * @since               1.0
+     */
+    public Node(int id, String name, String type, ArrayList<Connection> outgoing, ArrayList<Connection> incoming) {
         this.id = id;
         this.name = name;
         this.type = type;
@@ -39,11 +57,11 @@ public class Node {
         return type;
     }
 
-    public ArrayList<Integer> getOutgoing() {
+    public ArrayList<Connection> getOutgoing() {
         return outgoing;
     }
 
-    public ArrayList<Integer> getIncoming() {
+    public ArrayList<Connection> getIncoming() {
         return incoming;
     }
 }

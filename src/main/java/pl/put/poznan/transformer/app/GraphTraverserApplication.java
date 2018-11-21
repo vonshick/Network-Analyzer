@@ -5,9 +5,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
 @SpringBootApplication(scanBasePackages = {"pl.put.poznan.transformer.rest"})
-public class TextTransformerApplication {
+public class GraphTraverserApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(TextTransformerApplication.class, args);
+        SpringApplication.run(GraphTraverserApplication.class, args);
     }
 }
+
