@@ -57,9 +57,7 @@ public class Node {
         return type;
     }
 
-    public ArrayList<Connection> getOutgoing() {
-        return outgoing;
-    }
+    public ArrayList<Connection> getOutgoing() { return outgoing; }
 
     public ArrayList<Connection> getIncoming() {
         return incoming;
