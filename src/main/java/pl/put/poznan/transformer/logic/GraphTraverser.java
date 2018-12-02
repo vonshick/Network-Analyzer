@@ -28,6 +28,8 @@ public class GraphTraverser {
     private int entry;
     private int exit;
 
+    GraphTraversingAlgorithm algorithm;
+
     /**
      * Class constructor
      *
@@ -37,198 +39,16 @@ public class GraphTraverser {
     public GraphTraverser(String[] requestedAlgorithm, Logger logger){
         this.logger=logger;
         this.requestedAlgorithm = requestedAlgorithm;
-    }
-    
-    /**
-     * Algorithm traversing the network naively and setting answer to the path given by this algorithm
-     */
-     private void naive(){
-        double koszt = 0.0;
-        ArrayList<Integer> lista = new ArrayList<Integer>();
-        int current = entry;
-
-        lista.add(entry);
-
-        while(current!=exit){
-            double potencjalnyKoszt = 0.0;
-            double min=-1.0;
-            int minIndex = -1;
-            boolean leadsToUnvisited = false;
-
-            for (Connection conn:network.getNode(current).getOutgoing()){
-                if(!lista.contains(conn.getTo())){
-                    leadsToUnvisited = true;
-                    break;
-                }
+        if(requestedAlgorithm[0].equals("BFS")) {
+            algorithm = new BFS();
+        }
+        else{
+            if(requestedAlgorithm[0].equals("DFS")) {
+                algorithm = new DFS();
             }
-
-            for (Connection conn:network.getNode(current).getOutgoing()) {
-                if ((minIndex == -1 || min > conn.getValue()) && (!leadsToUnvisited || !lista.contains(conn.getTo()))) {
-                    min = conn.getValue();
-                    minIndex = conn.getTo();
-                    potencjalnyKoszt = conn.getValue();
-                }
+            else{
+                algorithm = new Naive();
             }
-            current = minIndex;
-
-            lista.add(minIndex);
-            koszt+=potencjalnyKoszt;
-
-        }
-
-        answer = new Answer(lista,koszt);
-    }
-
-    /**
-     *
-     * @param d list of ints to find argmin in
-     * @param q list that contains potential argmins
-     * @return argmin of d ommiting every potentioal argmin that is not contained in q
-     */
-    private int argmin(ArrayList<Double> d, ArrayList<Integer> q){
-         Double min = Double.MAX_VALUE;
-         int argmin = -1;
-         for(int i=0;i<d.size();i++){
-             if(q.contains(i) && d.get(i)<min){
-
-                 min=d.get(i);
-                 logger.debug("min="+min);
-                 logger.debug("argmin="+i);
-                 argmin=i;
-             }
-         }
-         return argmin;
-    }
-
-    /**
-     * BFS traversal from a entry to exit.
-     * Function finds an array of possible paths from entry to exit using BFS
-     * and assigns the path with minimal value to answer
-     */
-    private void dijkstra(){
-        //dystanse
-        ArrayList<Double> d = new ArrayList<>();
-        //poprzedniki
-        ArrayList<Integer> p = new ArrayList<>();
-        //kopia listy wierzchołków
-        ArrayList<Integer> q = new ArrayList<>();
-        //lista do odpwoiedzi generowana z p
-        ArrayList<Integer> l = new ArrayList<>();
-
-
-        int u;
-        for(int i=0;i<network.getNodes().size();i++){
-            d.add(Double.MAX_VALUE);
-            p.add(null);
-            q.add(i);
-        }
-        d.set(entry,0.0);
-        while(q.size()>0){
-            int n = argmin(d,q);
-            u=n;
-            q.removeIf(s -> s == n);
-            logger.debug("u="+u);
-            for(Connection v:network.getNode(u).getOutgoing()){
-                if(d.get(v.getTo())>d.get(u)+v.getValue()){
-                    d.set(v.getTo(),d.get(u)+v.getValue());
-                    logger.debug(""+v.getTo()+" "+d.get(v.getTo()));
-                    p.set(v.getTo(),u);
-                }
-            }
-        }
-        u=exit;
-        l.add(exit);
-        while(u!=entry){
-            u=p.get(u);
-            l.add(0,u);
-        }
-        answer = new Answer(l,d.get(exit));
-    }
-
-    private void wypiszlisteintow(ArrayList<Integer> l){
-        String a="";
-        for(Integer i:l){
-            a+=""+i+" ";
-        }
-        logger.debug(a);
-    }
-
-    private boolean DFSrecursion(ArrayList<Integer> listaIndeksow,ArrayList<Integer> visited ){
-
-        listaIndeksow.set(0,listaIndeksow.get(0)+1);
-
-        if(listaIndeksow.size()==1){
-            if(listaIndeksow.get(listaIndeksow.size()-1)<network.getNode(entry).getOutgoing().size()) return false;
-        }
-
-        if(listaIndeksow.get(0)>=network.getNode(visited.get(0)).getOutgoing().size()){
-           listaIndeksow.remove(0);
-           visited.remove(0);
-           if(listaIndeksow.size()<1)   return false;
-           return DFSrecursion(listaIndeksow,visited);
-        }
-
-        return true;
-    }
-
-    /**
-     * DFS traversal from entry to exit.
-     * Function finds an array of possible paths from entry to exit using DFS
-     * and assigns the path with minmal value to answer
-     */
-    private void DFS(){
-        ArrayList<Answer> listaOdpowiedzi = new ArrayList<>();
-        ArrayList<Integer> visited = new ArrayList<>();
-        ArrayList<Integer> listaIndeksow = new ArrayList<>();
-        Double koszt = 0.0;
-
-        visited.add(entry);
-        listaIndeksow.add(0);
-
-        boolean checkedAll = true;
-        while(checkedAll){
-
-            while(visited.get(0) != exit){
-                int potencjalnyNowy = network.getNode(visited.get(0)).getOutgoing().get(listaIndeksow.get(0)).getTo();
-                if(!visited.contains(potencjalnyNowy)){
-                    visited.add(0,potencjalnyNowy);
-                    listaIndeksow.add(0,0);
-                }
-                else{
-                    checkedAll = DFSrecursion(listaIndeksow,visited);
-                }
-            }
-            if (checkedAll){
-                Collections.reverse(visited);
-                koszt=0.0;
-                for(int i=0;i<visited.size()-2;i++){
-                    for(Connection conn:network.getNode(visited.get(i)).getOutgoing()){
-                        if(conn.getTo()==visited.get(i+1)){
-                            koszt+=conn.getValue();
-                            break;
-                        }
-                    }
-                }
-                listaOdpowiedzi.add(new Answer(new ArrayList<>(visited),koszt));
-                Collections.reverse(visited);
-
-                logger.debug("vis:");
-                wypiszlisteintow(visited);
-
-
-                visited.remove(0);
-                listaIndeksow.remove(0);
-                checkedAll = DFSrecursion(listaIndeksow,visited);
-            }
-        }
-
-        answer = listaOdpowiedzi.get(0);
-        logger.debug("Liczba znalezionych ścieżek: "+listaOdpowiedzi.size());
-        for(Answer ans:listaOdpowiedzi){
-            wypiszlisteintow(ans.getVisitedList());
-        }
-        for(Answer ans:listaOdpowiedzi){
-            if(ans.getValue()<answer.getValue()) answer = ans;
         }
     }
 
@@ -315,23 +135,11 @@ public class GraphTraverser {
             }
         }
 
-        if(requestedAlgorithm[0].equals("BFS")) {
-            logger.info("Starting BFS algorithm");
-            dijkstra();
-            logger.info("BFS algorithm ended");
-        }
-        else{
-            if(requestedAlgorithm[0].equals("DFS")) {
-                logger.info("Starting DFS algorithm");
-                DFS();
-                logger.info("DFS algorithm ended");
-            }
-            else{
-                logger.info("Starting naive algorithm");
-                naive();
-                logger.info("Naive algorithm ended");
-            }
-        }
+
+        algorithm.setEntry(entry);
+        algorithm.setExit(exit);
+        algorithm.setNetwork(network);
+        answer = algorithm.traverse();
 
         try {
             String jsonInString = mapper.writeValueAsString(answer);
