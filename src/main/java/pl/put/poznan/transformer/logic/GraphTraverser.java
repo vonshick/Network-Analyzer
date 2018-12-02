@@ -28,8 +28,6 @@ public class GraphTraverser {
     private int entry;
     private int exit;
 
-    private ArrayList<ArrayList<Connection>> incidenceList = null;
-
     /**
      * Class constructor
      *
@@ -39,21 +37,6 @@ public class GraphTraverser {
     public GraphTraverser(String[] requestedAlgorithm, Logger logger){
         this.logger=logger;
         this.requestedAlgorithm = requestedAlgorithm;
-    }
-
-    /**
-     * Method parsing the network into Incidence List that is a list of lists of Connectons
-     * @see Connection
-     */
-     private void tramsformToIncidenceList(){
-        incidenceList = new ArrayList<ArrayList<Connection>>();
-        network.getNodes().forEach(e->{
-                    incidenceList.add(new ArrayList<Connection>());
-                }
-                );
-        network.getConnections().forEach(conn-> {
-            incidenceList.get(conn.getFrom()).add(conn);
-        });
     }
     
     /**
@@ -72,14 +55,14 @@ public class GraphTraverser {
             int minIndex = -1;
             boolean leadsToUnvisited = false;
 
-            for (Connection conn:incidenceList.get(current)){
+            for (Connection conn:network.getNode(current).getOutgoing()){
                 if(!lista.contains(conn.getTo())){
                     leadsToUnvisited = true;
                     break;
                 }
             }
 
-            for (Connection conn:incidenceList.get(current)) {
+            for (Connection conn:network.getNode(current).getOutgoing()) {
                 if ((minIndex == -1 || min > conn.getValue()) && (!leadsToUnvisited || !lista.contains(conn.getTo()))) {
                     min = conn.getValue();
                     minIndex = conn.getTo();
@@ -134,7 +117,7 @@ public class GraphTraverser {
 
 
         int u;
-        for(int i=0;i<incidenceList.size();i++){
+        for(int i=0;i<network.getNodes().size();i++){
             d.add(Double.MAX_VALUE);
             p.add(null);
             q.add(i);
@@ -145,7 +128,7 @@ public class GraphTraverser {
             u=n;
             q.removeIf(s -> s == n);
             logger.debug("u="+u);
-            for(Connection v:incidenceList.get(u)){
+            for(Connection v:network.getNode(u).getOutgoing()){
                 if(d.get(v.getTo())>d.get(u)+v.getValue()){
                     d.set(v.getTo(),d.get(u)+v.getValue());
                     logger.debug(""+v.getTo()+" "+d.get(v.getTo()));
@@ -175,10 +158,10 @@ public class GraphTraverser {
         listaIndeksow.set(0,listaIndeksow.get(0)+1);
 
         if(listaIndeksow.size()==1){
-            if(listaIndeksow.get(listaIndeksow.size()-1)<incidenceList.get(entry).size()) return false;
+            if(listaIndeksow.get(listaIndeksow.size()-1)<network.getNode(entry).getOutgoing().size()) return false;
         }
 
-        if(listaIndeksow.get(0)>=incidenceList.get(visited.get(0)).size()){
+        if(listaIndeksow.get(0)>=network.getNode(visited.get(0)).getOutgoing().size()){
            listaIndeksow.remove(0);
            visited.remove(0);
            if(listaIndeksow.size()<1)   return false;
@@ -206,8 +189,7 @@ public class GraphTraverser {
         while(checkedAll){
 
             while(visited.get(0) != exit){
-
-                int potencjalnyNowy = incidenceList.get(visited.get(0)).get(listaIndeksow.get(0)).getTo();
+                int potencjalnyNowy = network.getNode(visited.get(0)).getOutgoing().get(listaIndeksow.get(0)).getTo();
                 if(!visited.contains(potencjalnyNowy)){
                     visited.add(0,potencjalnyNowy);
                     listaIndeksow.add(0,0);
@@ -220,7 +202,7 @@ public class GraphTraverser {
                 Collections.reverse(visited);
                 koszt=0.0;
                 for(int i=0;i<visited.size()-2;i++){
-                    for(Connection conn:incidenceList.get(visited.get(i))){
+                    for(Connection conn:network.getNode(visited.get(i)).getOutgoing()){
                         if(conn.getTo()==visited.get(i+1)){
                             koszt+=conn.getValue();
                             break;
@@ -325,12 +307,11 @@ public class GraphTraverser {
         logger.info("Exit: "+exit);
 
         logger.info("Transforming graph to incidence list");
-        tramsformToIncidenceList();
 
         //to może być niepotrzebne
-        for(int i=0;i<incidenceList.size();i++){
-            for (int j=0;j<incidenceList.get(i).size();j++){
-                logger.debug("From "+i+", to "+incidenceList.get(i).get(j).getTo()+", value: "+incidenceList.get(i).get(j).getValue());
+        for(int i=0;i<network.getNodes().size();i++){
+            for (int j=0;j<network.getNode(i).getOutgoing().size();j++){
+                logger.debug("From "+i+", to "+network.getNode(i).getOutgoing().get(j).getTo()+", value: "+network.getNode(i).getOutgoing().get(j).getValue());
             }
         }
 
