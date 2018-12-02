@@ -302,10 +302,12 @@ public class GraphTraverser {
      * checks whether it's correct,
      * calls traversing function
      * and returns the effects of the called function
-     *  
+     *
+     * @param text - JSON input
      * @return JSON containing an object of class Answer with visitedList set to the list of nodes given by the desired algorithm
      * and cost set to the cost of traversing the graph via these nodes in this order
      */
+
     public String transform(String text){
         ObjectMapper mapper = new ObjectMapper();
         try {
