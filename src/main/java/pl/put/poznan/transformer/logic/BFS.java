@@ -1,11 +1,17 @@
 package pl.put.poznan.transformer.logic;
 
+import org.slf4j.Logger;
+
 import java.util.ArrayList;
 
 public class BFS extends GraphTraversingAlgorithm {
 
     public BFS() {
         super();
+    }
+
+    public BFS(Logger logger) {
+        super(logger);
     }
 
     /**

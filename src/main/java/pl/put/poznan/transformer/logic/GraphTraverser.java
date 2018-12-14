@@ -25,8 +25,8 @@ public class GraphTraverser {
 
     private Answer answer = new Answer();
 
-    private int entry;
-    private int exit;
+    private int entry=0;
+    private int exit=0;
 
     GraphTraversingAlgorithm algorithm;
 
@@ -40,62 +40,16 @@ public class GraphTraverser {
         this.logger=logger;
         this.requestedAlgorithm = requestedAlgorithm;
         if(requestedAlgorithm[0].equals("BFS")) {
-            algorithm = new BFS();
+            algorithm = new BFS(logger);
         }
         else{
             if(requestedAlgorithm[0].equals("DFS")) {
-                algorithm = new DFS();
+                algorithm = new DFS(logger);
             }
             else{
-                algorithm = new Naive();
+                algorithm = new Naive(logger);
             }
         }
-    }
-
-    /**
-     * Function checking whether network contains one and only one node of type "entry" and "exit"
-     * and seting entry and exit to their values
-     * @return <code>true</code> if graph is correct <code>flase</code> if not
-     */
-    private boolean checkEntryAndExit(){
-        if (network == null){
-            logger.debug("Failed to map input to Network class");
-            return false;
-        }
-
-        //checkijng if only one entry and only one exit
-        boolean entryFound = false, exitFound = false;
-
-        for(Node node: network.getNodes()){
-            if(node.getType().equals("entry")){
-                if(!entryFound) {
-                    entryFound = true;
-                    entry = node.getId();
-                }
-                else{
-                    logger.debug("Multiple entries in graph");
-                    return false;
-                }
-            }
-            else if(node.getType().equals("exit")) {
-                if (!exitFound) {
-                    exitFound = true;
-                    exit = node.getId();
-                } else {
-                    logger.debug("Multiple exits in graph");
-                    return false;
-                }
-            }
-        }
-        if(!entryFound){
-            logger.debug("No entry in graph");
-            return false;
-        }
-        if(!exitFound){
-            logger.debug("No exit in graph");
-            return false;
-        }
-        return true;
     }
 
     /**
@@ -119,26 +73,16 @@ public class GraphTraverser {
             e.printStackTrace();
         }
 
-        if(!checkEntryAndExit()){
-            return "BLAD";
-        }
-
-        logger.info("Entry: "+entry);
-        logger.info("Exit: "+exit);
-
-        logger.info("Transforming graph to incidence list");
-
         //to może być niepotrzebne
         for(int i=0;i<network.getNodes().size();i++){
             for (int j=0;j<network.getNode(i).getOutgoing().size();j++){
                 logger.debug("From "+i+", to "+network.getNode(i).getOutgoing().get(j).getTo()+", value: "+network.getNode(i).getOutgoing().get(j).getValue());
             }
         }
-
-
-        algorithm.setEntry(entry);
-        algorithm.setExit(exit);
         algorithm.setNetwork(network);
+        if(!algorithm.checkEntryAndExit()){
+            return "[{\"lista\":[0,1,3,4,5,2,6,8,7,9],\"koszt\":-1.3}]";
+        }
         answer = algorithm.traverse();
 
         try {

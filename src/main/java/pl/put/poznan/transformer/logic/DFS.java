@@ -1,11 +1,17 @@
 package pl.put.poznan.transformer.logic;
 
+import org.slf4j.Logger;
+
 import java.util.ArrayList;
 import java.util.Collections;
 
 public class DFS extends GraphTraversingAlgorithm {
     public DFS() {
         super();
+    }
+
+    public DFS(Logger logger) {
+        super(logger);
     }
 
     private boolean DFSrecursion(ArrayList<Integer> listaIndeksow, ArrayList<Integer> visited ){

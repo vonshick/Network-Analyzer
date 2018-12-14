@@ -1,10 +1,16 @@
 package pl.put.poznan.transformer.logic;
 
+import org.slf4j.Logger;
+
 import java.util.ArrayList;
 
 public class Naive extends GraphTraversingAlgorithm{
     public Naive() {
         super();
+    }
+
+    public Naive(Logger logger) {
+        super(logger);
     }
 
     /**
