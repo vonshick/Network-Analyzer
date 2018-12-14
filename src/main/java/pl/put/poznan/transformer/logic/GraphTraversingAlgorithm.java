@@ -1,6 +1,9 @@
 package pl.put.poznan.transformer.logic;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
+
+import java.io.IOException;
 
 public abstract class GraphTraversingAlgorithm {
     Network network;
@@ -9,8 +12,14 @@ public abstract class GraphTraversingAlgorithm {
 
     private static Logger logger;
 
-    public void setNetwork(Network network) {
-        this.network = network;
+    public void setNetwork(String networkJSON) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            network= mapper.readValue(networkJSON, Network.class);
+        } catch (IOException e) {
+            logger.debug("Failed to map input to Network class");
+            e.printStackTrace();
+        }
 
         network.getNodes().forEach(node->{
             if(node.getType().equals("entry")){
