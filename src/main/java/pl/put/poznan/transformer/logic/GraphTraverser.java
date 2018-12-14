@@ -79,11 +79,15 @@ public class GraphTraverser {
         try {
             ObjectMapper mapper = new ObjectMapper();
             String jsonInString = mapper.writeValueAsString(answer);
-            logger.info("Sending output to client:");
-            logger.info(jsonInString);
+            if(logger != null) {
+                logger.info("Sending output to client:");
+                logger.info(jsonInString);
+            }
             return "["+jsonInString+"]";
         } catch (JsonProcessingException e) {
-            logger.debug("Failed to map answer to Network class");
+            if (logger != null) {
+                logger.debug("Failed to map answer to Network class");
+            }
             return "[{\"lista\":[0,1,3,4,5,2,6,8,7,9],\"koszt\":-1.3}]";
         }
         
