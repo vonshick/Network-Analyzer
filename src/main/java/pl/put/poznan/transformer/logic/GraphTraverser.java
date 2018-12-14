@@ -19,16 +19,14 @@ import java.util.Collections;
 public class GraphTraverser {
 
     private static Logger logger;
-    private final String[] requestedAlgorithm;
-    
+
     private Network network=null;
 
-    private Answer answer = new Answer();
 
-    private int entry=0;
-    private int exit=0;
-
-    GraphTraversingAlgorithm algorithm;
+    /**
+     * 
+     */
+    private GraphTraversingAlgorithm algorithm;
 
     /**
      * Class constructor
@@ -38,7 +36,6 @@ public class GraphTraverser {
      */
     public GraphTraverser(String[] requestedAlgorithm, Logger logger){
         this.logger=logger;
-        this.requestedAlgorithm = requestedAlgorithm;
         if(requestedAlgorithm[0].equals("BFS")) {
             algorithm = new BFS(logger);
         }
@@ -83,7 +80,7 @@ public class GraphTraverser {
         if(!algorithm.checkEntryAndExit()){
             return "[{\"lista\":[0,1,3,4,5,2,6,8,7,9],\"koszt\":-1.3}]";
         }
-        answer = algorithm.traverse();
+        Answer answer = algorithm.traverse();
 
         try {
             String jsonInString = mapper.writeValueAsString(answer);
