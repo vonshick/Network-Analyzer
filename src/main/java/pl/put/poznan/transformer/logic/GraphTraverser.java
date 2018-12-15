@@ -21,11 +21,7 @@ public class GraphTraverser {
     private static Logger logger;
 
     private Network network=null;
-
-
-    /**
-     *
-     */
+    
     private GraphTraversingAlgorithm algorithm;
 
     /**
@@ -92,4 +88,9 @@ public class GraphTraverser {
         }
         
     }
+
+    public GraphTraversingAlgorithm getAlgorithm() {
+        return algorithm;
+    }
+
 }
