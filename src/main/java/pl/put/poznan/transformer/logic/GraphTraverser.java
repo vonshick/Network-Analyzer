@@ -21,11 +21,7 @@ public class GraphTraverser {
     private static Logger logger;
 
     private Network network=null;
-
-
-    /**
-     * 
-     */
+    
     private GraphTraversingAlgorithm algorithm;
 
     /**
@@ -36,11 +32,11 @@ public class GraphTraverser {
      */
     public GraphTraverser(String[] requestedAlgorithm, Logger logger){
         this.logger=logger;
-        if(requestedAlgorithm[0].equals("BFS")) {
+        if(requestedAlgorithm[0].toUpperCase().equals("BFS")) {
             algorithm = new BFS(logger);
         }
         else{
-            if(requestedAlgorithm[0].equals("DFS")) {
+            if(requestedAlgorithm[0].toUpperCase().equals("DFS")) {
                 algorithm = new DFS(logger);
             }
             else{
@@ -62,35 +58,31 @@ public class GraphTraverser {
      */
 
     public String transform(String text){
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            network= mapper.readValue(text, Network.class);
-        } catch (IOException e) {
-            logger.debug("Failed to map input to Network class");
-            e.printStackTrace();
-        }
-
-        //to może być niepotrzebne
-        for(int i=0;i<network.getNodes().size();i++){
-            for (int j=0;j<network.getNode(i).getOutgoing().size();j++){
-                logger.debug("From "+i+", to "+network.getNode(i).getOutgoing().get(j).getTo()+", value: "+network.getNode(i).getOutgoing().get(j).getValue());
-            }
-        }
-        algorithm.setNetwork(network);
-        if(!algorithm.checkEntryAndExit()){
-            return "[{\"lista\":[0,1,3,4,5,2,6,8,7,9],\"koszt\":-1.3}]";
+        String ansIfWrong="[{\"visitedList\":[],\"value\":0}]";
+        if(!algorithm.setNetwork(text)){
+            return ansIfWrong;
         }
         Answer answer = algorithm.traverse();
 
         try {
+            ObjectMapper mapper = new ObjectMapper();
             String jsonInString = mapper.writeValueAsString(answer);
-            logger.info("Sending output to client:");
-            logger.info(jsonInString);
+            if(logger != null) {
+                logger.info("Sending output to client:");
+                logger.info(jsonInString);
+            }
             return "["+jsonInString+"]";
         } catch (JsonProcessingException e) {
-            logger.debug("Failed to map answer to Network class");
-            return "[{\"lista\":[0,1,3,4,5,2,6,8,7,9],\"koszt\":-1.3}]";
+            if (logger != null) {
+                logger.debug("Failed to map answer to Network class");
+            }
+            return ansIfWrong;
         }
         
     }
+
+    public GraphTraversingAlgorithm getAlgorithm() {
+        return algorithm;
+    }
+
 }

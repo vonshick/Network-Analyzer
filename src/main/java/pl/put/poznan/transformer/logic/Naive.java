@@ -18,6 +18,7 @@ public class Naive extends GraphTraversingAlgorithm{
      */
     @Override
     public Answer traverse() {
+        if(!isGraphCorrect()) return new Answer(new ArrayList<>(),0.0);
         double koszt = 0.0;
         ArrayList<Integer> lista = new ArrayList<Integer>();
         int current = entry;

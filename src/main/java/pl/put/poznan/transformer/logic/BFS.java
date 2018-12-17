@@ -40,6 +40,7 @@ public class BFS extends GraphTraversingAlgorithm {
      */
     @Override
     public Answer traverse() {
+        if(!isGraphCorrect()) return new Answer(new ArrayList<>(),0.0);
         //dystanse
         ArrayList<Double> d = new ArrayList<>();
         //poprzedniki
