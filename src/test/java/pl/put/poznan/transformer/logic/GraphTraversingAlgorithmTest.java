@@ -81,7 +81,7 @@ class GraphTraversingAlgorithmTest {
     void testSetNetworkWrongInput() {
         try {
             graphTraversingAlgorithm.setNetwork("test");
-            //fail();
+            fail();
         } catch (Exception e) {
         }
     }
