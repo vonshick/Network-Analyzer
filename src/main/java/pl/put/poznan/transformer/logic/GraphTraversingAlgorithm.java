@@ -17,7 +17,9 @@ public abstract class GraphTraversingAlgorithm {
         try {
             network= mapper.readValue(networkJSON, Network.class);
         } catch (IOException e) {
-            logger.debug("Failed to map input to Network class");
+            if (logger != null) {
+                logger.debug("Failed to map input to Network class");
+            }
             e.printStackTrace();
         }
 
@@ -29,8 +31,10 @@ public abstract class GraphTraversingAlgorithm {
                 exit=node.getId();
             }
         });
-        logger.info("Entry: "+entry);
-        logger.info("Exit: "+exit);
+        if (logger != null) {
+            logger.info("Entry: "+entry);
+            logger.info("Exit: "+exit);
+        }
     }
 
 
@@ -50,7 +54,9 @@ public abstract class GraphTraversingAlgorithm {
      */
     public boolean checkEntryAndExit(){
         if (network == null){
-            logger.debug("Failed to map input to Network class");
+            if (logger != null) {
+                logger.debug("Failed to map input to Network class");
+            }
             return false;
         }
 
@@ -64,7 +70,9 @@ public abstract class GraphTraversingAlgorithm {
                     entry = node.getId();
                 }
                 else{
-                    logger.debug("Multiple entries in graph");
+                    if (logger != null) {
+                        logger.debug("Multiple entries in graph");
+                    }
                     return false;
                 }
             }
@@ -73,17 +81,23 @@ public abstract class GraphTraversingAlgorithm {
                     exitFound = true;
                     exit = node.getId();
                 } else {
-                    logger.debug("Multiple exits in graph");
+                    if (logger != null) {
+                        logger.debug("Multiple exits in graph");
+                    }
                     return false;
                 }
             }
         }
         if(!entryFound){
-            logger.debug("No entry in graph");
+            if (logger != null) {
+                logger.debug("No entry in graph");
+            }
             return false;
         }
         if(!exitFound){
-            logger.debug("No exit in graph");
+            if (logger != null) {
+                logger.debug("No exit in graph");
+            }
             return false;
         }
         return true;
