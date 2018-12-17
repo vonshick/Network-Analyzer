@@ -16,3 +16,11 @@ Dla administratorów różnego rodzaju sieci (energetycznych, wodociągowych itp
      - from = z jakiego węzła
      - to = do jakiego węzła
      - value = wartość, która w zależności od dziedziny biznesowej może oznaczać np. dystans, przepustowość, itd.
+     
+## UML: 
+![Alt text](UML.png?raw=true "Title")
+
+## Uwagi do pracy w zespole z użyciem metodyki Scrum
+1. Powinniśmy informować się o problemach na bieżąco.
+2. W razie przeszacowania części sprintu należy podzielić ją pomiędzy kilku członków zespołu.
+

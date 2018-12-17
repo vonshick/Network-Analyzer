@@ -42,4 +42,12 @@ public class Network {
     public ArrayList<Node> getNodes() {
         return nodes;
     }
+
+    public Connection getConnection(int i) {
+        return connections.get(i);
+    }
+
+    public Node getNode(int i) {
+        return nodes.get(i);
+    }
 }
