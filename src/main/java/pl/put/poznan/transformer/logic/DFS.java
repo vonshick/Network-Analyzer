@@ -24,7 +24,7 @@ public class DFS extends GraphTraversingAlgorithm {
     }
 
 
-    private boolean DFSrecursion(ArrayList<Integer> listaIndeksow, ArrayList<Integer> visited ){
+    public boolean DFSrecursion(ArrayList<Integer> listaIndeksow, ArrayList<Integer> visited ){
 
         listaIndeksow.set(0,listaIndeksow.get(0)+1);
 
