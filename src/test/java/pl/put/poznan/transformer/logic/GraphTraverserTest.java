@@ -3,6 +3,8 @@ package pl.put.poznan.transformer.logic;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
+import pl.put.poznan.transformer.rest.GraphTraverserController;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -32,21 +34,21 @@ class GraphTraverserTest {
     @Test
     void testGraphTraverserWithValidInput() {
         algorithm[0] = "BFS";
-        graphTraverser = new GraphTraverser(algorithm, null);
+        graphTraverser = new GraphTraverser(algorithm, LoggerFactory.getLogger(GraphTraverserController.class));
         assertTrue(graphTraverser.getAlgorithm() != null);
     }
 
     @Test
     void testGraphTraverserWithInvalidInput() {
         algorithm[0] = "InvalidInput";
-        graphTraverser = new GraphTraverser(algorithm, null);
-        assertFalse(graphTraverser.getAlgorithm() != null);
+        graphTraverser = new GraphTraverser(algorithm, LoggerFactory.getLogger(GraphTraverserController.class));
+        assertTrue(graphTraverser.getAlgorithm().getClass().equals(Naive.class));
     }
 
     @Test
     void testTransformWithInvalidInput() {
         algorithm[0] = "BFS";
-        graphTraverser = new GraphTraverser(algorithm, null);
+        graphTraverser = new GraphTraverser(algorithm, LoggerFactory.getLogger(GraphTraverserController.class));
         try {
             graphTraverser.transform("InvalidInput");
             fail();
@@ -57,7 +59,7 @@ class GraphTraverserTest {
     @Test
     void testTransformWithValidInput() {
         algorithm[0] = "BFS";
-        graphTraverser = new GraphTraverser(algorithm, null);
+        graphTraverser = new GraphTraverser(algorithm, LoggerFactory.getLogger(GraphTraverserController.class));
         assertTrue(graphTraverser.transform(graph) != null);
     }
 }

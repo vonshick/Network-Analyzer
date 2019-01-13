@@ -3,7 +3,14 @@ package pl.put.poznan.transformer.logic;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
-
+/**
+ * Naive is a child of GraphTraversingAlgorithm. It implements naive function for finding the shortest path in a graph
+ * @author      Artur Mostowski
+ * @author      Dominik Szmyt
+ * @author      Łukasz Grygier
+ * @author      Jakub Wąsik
+ * @since       1.0.2
+ */
 public class Naive extends GraphTraversingAlgorithm{
     public Naive() {
         super();
@@ -18,6 +25,7 @@ public class Naive extends GraphTraversingAlgorithm{
      */
     @Override
     public Answer traverse() {
+        if(!isGraphCorrect()) return new Answer(new ArrayList<>(),0.0);
         double koszt = 0.0;
         ArrayList<Integer> lista = new ArrayList<Integer>();
         int current = entry;

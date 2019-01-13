@@ -3,7 +3,15 @@ package pl.put.poznan.transformer.logic;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
-
+/**
+ * BFS is a child of GraphTraversingAlgorithm. It implements BFS with weights (Dijkstra's algorithm)
+ * in order to find the shortest path in a graph
+ * @author      Artur Mostowski
+ * @author      Dominik Szmyt
+ * @author      Łukasz Grygier
+ * @author      Jakub Wąsik
+ * @since       1.0.2
+ */
 public class BFS extends GraphTraversingAlgorithm {
 
     public BFS() {
@@ -40,6 +48,7 @@ public class BFS extends GraphTraversingAlgorithm {
      */
     @Override
     public Answer traverse() {
+        if(!isGraphCorrect()) return new Answer(new ArrayList<>(),0.0);
         //dystanse
         ArrayList<Double> d = new ArrayList<>();
         //poprzedniki

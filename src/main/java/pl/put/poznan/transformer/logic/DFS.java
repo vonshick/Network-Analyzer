@@ -5,14 +5,24 @@ import org.slf4j.Logger;
 import java.util.ArrayList;
 import java.util.Collections;
 
+/**
+ * DFS is a child of GraphTraversingAlgorithm. It implements recurring DFS for finding the shortest path in a graph
+ * @author      Artur Mostowski
+ * @author      Dominik Szmyt
+ * @author      Łukasz Grygier
+ * @author      Jakub Wąsik
+ * @since       1.0.2
+ */
 public class DFS extends GraphTraversingAlgorithm {
     public DFS() {
         super();
     }
 
+
     public DFS(Logger logger) {
         super(logger);
     }
+
 
     private boolean DFSrecursion(ArrayList<Integer> listaIndeksow, ArrayList<Integer> visited ){
 
@@ -39,6 +49,9 @@ public class DFS extends GraphTraversingAlgorithm {
      */
     @Override
     public Answer traverse() {
+
+        if(!isGraphCorrect()) return new Answer(new ArrayList<>(),0.0);
+
         ArrayList<Answer> listaOdpowiedzi = new ArrayList<>();
         ArrayList<Integer> visited = new ArrayList<>();
         ArrayList<Integer> listaIndeksow = new ArrayList<>();
@@ -63,7 +76,7 @@ public class DFS extends GraphTraversingAlgorithm {
             if (checkedAll){
                 Collections.reverse(visited);
                 koszt=0.0;
-                for(int i=0;i<visited.size()-2;i++){
+                for(int i=0;i<visited.size()-1;i++){
                     for(Connection conn:network.getNode(visited.get(i)).getOutgoing()){
                         if(conn.getTo()==visited.get(i+1)){
                             koszt+=conn.getValue();
