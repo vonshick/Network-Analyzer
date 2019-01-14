@@ -85,14 +85,29 @@ class DFSTest {
         when(mockIndexList.get(0)).thenReturn(0);
         when(mockIndexList.set(0, 1)).thenReturn(true);
         when(mockIndexList.size()).thenReturn(0);
-        when(mockIndexList.remove(0)).thenReturn(true);
         when(mockVisitedList.get(0)).thenReturn(0);
-        when(mockVisitedList.remove(0)).thenReturn(true);
 
         dfs.setNetwork(simpleGraph);
         dfs.DFSrecursion(mockIndexList, mockVisitedList);
         verify(mockIndexList, times(2)).get(0);
         verify(mockIndexList, times(1)).size();
         verify(mockIndexList, times(1)).set(0, 1);
+        verify(mockVisitedList, times(1)).get(0);
+    }
+
+    @Test
+    void testMocksInDFSRecursion() {
+        when(mockIndexList.get(0)).thenReturn(2);
+        when(mockIndexList.set(0, 1)).thenReturn(true);
+        when(mockIndexList.size()).thenReturn(0);
+        when(mockIndexList.remove(0)).thenReturn(true);
+        when(mockVisitedList.get(0)).thenReturn(0);
+        when(mockVisitedList.remove(0)).thenReturn(true);
+
+        dfs.setNetwork(simpleGraph);
+        dfs.DFSrecursion(mockIndexList, mockVisitedList);
+        verify(mockIndexList, times(2)).size();
+        verify(mockIndexList, times(1)).remove(0);
+        verify(mockVisitedList, times(1)).remove(0);
     }
 }
