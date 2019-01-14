@@ -3,7 +3,15 @@ package pl.put.poznan.transformer.logic;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
-
+/**
+ * BFS is a child of GraphTraversingAlgorithm. It implements BFS with weights (Dijkstra's algorithm)
+ * in order to find the shortest path in a graph
+ * @author      Artur Mostowski
+ * @author      Dominik Szmyt
+ * @author      Łukasz Grygier
+ * @author      Jakub Wąsik
+ * @since       1.0.2
+ */
 public class BFS extends GraphTraversingAlgorithm {
 
     public BFS() {
@@ -20,7 +28,7 @@ public class BFS extends GraphTraversingAlgorithm {
      * @param q list that contains potential argmins
      * @return argmin of d ommiting every potentioal argmin that is not contained in q
      */
-    private int argmin(ArrayList<Double> d, ArrayList<Integer> q){
+    public int argmin(ArrayList<Double> d, ArrayList<Integer> q){
         Double min = Double.MAX_VALUE;
         int argmin = -1;
         for(int i=0;i<d.size();i++){
