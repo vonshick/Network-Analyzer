@@ -58,6 +58,7 @@ public class GraphTraverser {
      */
 
     public String transform(String text){
+        text=text.replace('%',' ');
         String ansIfWrong="[{\"visitedList\":[],\"value\":0}]";
         if(!algorithm.setNetwork(text)){
             return ansIfWrong;

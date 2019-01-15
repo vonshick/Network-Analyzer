@@ -21,6 +21,16 @@ Dla administratorów różnego rodzaju sieci (energetycznych, wodociągowych itp
 ![Alt text](UML.png?raw=true "Title")
 
 ## Uwagi do pracy w zespole z użyciem metodyki Scrum
+### Sprint 1
 1. Powinniśmy informować się o problemach na bieżąco.
 2. W razie przeszacowania części sprintu należy podzielić ją pomiędzy kilku członków zespołu.
+### Sprint 2
+1. Praca nad oszacowywaniem zadań - dodawanie zapasu czasu na niespodziewane problemy.
 
+## Pomiar jakości kodu 
+Dokonaliśmy pomiaru jakości kodu zgodnie z metodą Goal Question Metric:
+- Question: Czy klasy nie są zbyt rozbudowane? 
+- Goal: Minimalizacja liczby linii kodu w poszczególnych klasach. 
+- Metric: NCSS (non-commenting source statements).
+   
+Obliczyliśmy liczbę linii kodu dla każdej z klas (również tych testowych) i zauważyliśmy, że we wszystkich przypadkach wynosi ona znacznie mniej niż 300, która to wartość uznawana jest za górną granicę dobrego wyniku. 

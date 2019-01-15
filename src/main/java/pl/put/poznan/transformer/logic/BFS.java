@@ -28,7 +28,7 @@ public class BFS extends GraphTraversingAlgorithm {
      * @param q list that contains potential argmins
      * @return argmin of d ommiting every potentioal argmin that is not contained in q
      */
-    private int argmin(ArrayList<Double> d, ArrayList<Integer> q){
+    public int argmin(ArrayList<Double> d, ArrayList<Integer> q){
         Double min = Double.MAX_VALUE;
         int argmin = -1;
         for(int i=0;i<d.size();i++){
