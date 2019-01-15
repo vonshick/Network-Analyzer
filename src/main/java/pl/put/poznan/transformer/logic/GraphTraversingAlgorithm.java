@@ -5,6 +5,16 @@ import org.slf4j.Logger;
 
 import java.io.IOException;
 
+/**
+ * GraphTraversingAlgorithm is an abstract class that serves as a parent for all the implementations of graph
+ * traversing algorithms. It includes methods checking whether the input is correct.
+ * @author      Artur Mostowski
+ * @author      Dominik Szmyt
+ * @author      Łukasz Grygier
+ * @author      Jakub Wąsik
+ * @since       1.0.2
+ */
+
 public abstract class GraphTraversingAlgorithm {
     Network network;
     int entry=-1;
